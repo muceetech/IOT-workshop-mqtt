@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ESP32 Voltage Gauge</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .gauge-container {
+      position: relative;
+      width: 240px;
+      height: 140px;
+      margin: 40px auto;
+    }
+
+    .gauge {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at bottom, #fff 60%, #ddd 100%);
+      border-top-left-radius: 120px;
+      border-top-right-radius: 120px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .needle {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      height: 100%;
+      background: #e74c3c;
+      transform-origin: bottom center;
+      transform: rotate(-90deg);
+      transition: transform 0.5s ease-out;
+    }
+
+    .center-dot {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 8px;        /* smaller size */
+  height: 8px;
+  margin-left: -4px; /* center it */
+  background: #333;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+    .scale {
+      position: absolute;
+      bottom: -20px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 0 10px;
+      color: #666;
+    }
+
+    .voltage-display {
+      margin-top: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #222;
+    }
+
+    #status {
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ESP32 Voltage Gauge</h1>
+
+  <div class="gauge-container">
+    <div class="gauge">
+      <div class="needle" id="needle"></div>
+      <div class="center-dot"></div>
+    </div>
+    <div class="scale">
+      <span>0.0V</span>
+      <span>3.3V</span>
+    </div>
+  </div>
+
+  <div class="voltage-display" id="voltage">-- V</div>
+  <div id="status">Connecting to MQTT...</div>
+
+  <script>
+    const needle = document.getElementById("needle");
+    const voltageDisplay = document.getElementById("voltage");
+
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
+      clientId: "voltage-gauge-" + Math.random().toString(16).substr(2, 8)
+    });
+
+    client.on("connect", () => {
+  document.getElementById("status").innerText = "✅ Connected to MQTT broker";
+  client.subscribe("esp32/analog");
+});
+
+client.on("message", (topic, message) => {
+  const voltage = parseFloat(message.toString());
+  if (!isNaN(voltage)) {
+    voltageDisplay.textContent = voltage.toFixed(2) + " V";
+    const angle = (voltage / 3.3) * 180 - 90; // -90 to +90 degrees
+    needle.style.transform = `rotate(${angle}deg)`;
+  }
+});
+
+client.on("error", (err) => {
+  document.getElementById("status").innerText = "❌ MQTT Error: " + err.message;
+});
+
+client.on("offline", () => {
+  document.getElementById("status").innerText = "⚠️ MQTT offline";
+});
+
+client.on("reconnect", () => {
+  document.getElementById("status").innerText = "🔄 Reconnecting to MQTT...";
+});
+
+client.on("close", () => {
+  document.getElementById("status").innerText = "🔌 MQTT connection closed";
+});
+
+  </script>
+</body>
+</html>
