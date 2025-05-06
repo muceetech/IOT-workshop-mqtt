@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MQTT RGB LED Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .controller {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .slider-group {
+      margin-bottom: 15px;
+    }
+    .slider-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type=range] {
+      width: 100%;
+    }
+    #status {
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>MQTT RGB LED Controller</h1>
+  <div class="controller">
+    <div class="slider-group">
+      <label for="red">Red</label>
+      <input type="range" id="red" min="0" max="255" value="0">
+    </div>
+    <div class="slider-group">
+      <label for="green">Green</label>
+      <input type="range" id="green" min="0" max="255" value="0">
+    </div>
+    <div class="slider-group">
+      <label for="blue">Blue</label>
+      <input type="range" id="blue" min="0" max="255" value="0">
+    </div>
+    <p id="status">Connecting to MQTT...</p>
+  </div>
+
+  <script>
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
+      clientId: 'rgb-controller-' + Math.random().toString(16).substr(2, 8)
+    });
+
+    client.on('connect', () => {
+      document.getElementById('status').innerText = 'Connected to MQTT broker';
+    });
+
+    client.on('error', () => {
+      document.getElementById('status').innerText = 'Error connecting to MQTT';
+    });
+
+    function publishRGB() {
+      const r = document.getElementById('red').value;
+      const g = document.getElementById('green').value;
+      const b = document.getElementById('blue').value;
+      const payload = JSON.stringify({ r: Number(r), g: Number(g), b: Number(b) });
+      client.publish('esp32/rgb', payload);
+    }
+
+    document.getElementById('red').addEventListener('input', publishRGB);
+    document.getElementById('green').addEventListener('input', publishRGB);
+    document.getElementById('blue').addEventListener('input', publishRGB);
+  </script>
+</body>
+</html>
