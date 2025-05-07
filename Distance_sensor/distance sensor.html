@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Distance Sensor Dashboard</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    #distance {
+  font-size: 2.5em;
+  color: #2c3e50;
+  margin: 20px auto;
+  border: 2px solid #3498db;
+  padding: 10px 30px; /* 10px top/bottom, 30px left/right */
+  border-radius: 10px;
+  display: inline-block;
+}
+  </style>
+</head>
+<body>
+  <h1>Ultrasonic Distance</h1>
+  <div id="distance">-- cm</div>
+  <p id="status">Connecting to MQTT...</p>
+
+  <script>
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+    client.on("connect", function () {
+      document.getElementById("status").textContent = "✅ Connected to MQTT broker";
+      client.subscribe("esp32/distance");
+    });
+
+    client.on("message", function (topic, message) {
+      if (topic === "esp32/distance") {
+        document.getElementById("distance").textContent = message.toString() + " cm";
+      }
+    });
+
+    client.on("error", function (err) {
+      document.getElementById("status").textContent = "❌ MQTT connection error";
+      console.error("MQTT error", err);
+    });
+  </script>
+</body>
+</html>
