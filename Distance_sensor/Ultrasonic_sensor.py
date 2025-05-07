@@ -27,7 +27,7 @@ def get_distance_cm(trigger, echo):
     time.sleep_us(10)
     trigger.off()
     duration = time_pulse_us(echo, 1, 30000)  # timeout 30ms
-    distance_cm = (duration / 2) / 29.1
+    distance_cm = (duration / 2) / 29.4
     return round(distance_cm, 1)
 
 # Setup
