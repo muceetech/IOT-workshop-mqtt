@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP32 MPU6050 Dashboard</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    h2 { margin-top: 20px; }
+    .value-box { font-size: 1.5em; margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+<h1>🧭 ESP32 MPU6050 Sensor Dashboard</h1>
+<p id="status">Connecting to MQTT...</p>
+
+<h2>Accelerometer (X, Y, Z)</h2>
+<div class="value-box">X: <span id="acc_x">--</span></div>
+<div class="value-box">Y: <span id="acc_y">--</span></div>
+<div class="value-box">Z: <span id="acc_z">--</span></div>
+
+<h2>Gyroscope (X, Y, Z)</h2>
+<div class="value-box">X: <span id="gyro_x">--</span></div>
+<div class="value-box">Y: <span id="gyro_y">--</span></div>
+<div class="value-box">Z: <span id="gyro_z">--</span></div>
+
+<script>
+  const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+  client.on("connect", () => {
+    document.getElementById("status").textContent = "✅ Connected to MQTT";
+    client.subscribe("esp32/mpu6050");
+  });
+
+  client.on("message", (topic, message) => {
+    const data = JSON.parse(message.toString());
+    document.getElementById("acc_x").textContent = data.acc_x;
+    document.getElementById("acc_y").textContent = data.acc_y;
+    document.getElementById("acc_z").textContent = data.acc_z;
+    document.getElementById("gyro_x").textContent = data.gyro_x;
+    document.getElementById("gyro_y").textContent = data.gyro_y;
+    document.getElementById("gyro_z").textContent = data.gyro_z;
+  });
+
+  client.on("error", () => {
+    document.getElementById("status").textContent = "❌ MQTT connection error";
+  });
+
+  client.on("close", () => {
+    document.getElementById("status").textContent = "🔌 MQTT disconnected";
+  });
+</script>
+
+</body>
+</html>
