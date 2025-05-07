@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DC Motor Control</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    input[type=range] {
+      width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1em;
+    }
+    #speedValue {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>DC Motor Control</h1>
+
+  <p>Speed: <span id="speedValue">0</span>%</p>
+  <input type="range" id="speedSlider" min="0" max="100" value="0" oninput="updateSpeed()"><br><br>
+
+  <button onclick="setDirection('cw')">Clockwise</button>
+  <button onclick="setDirection('ccw')">Anticlockwise</button>
+  <button onclick="setDirection('stop')">Stop</button>
+
+  <p id="status">Connecting to MQTT...</p>
+
+  <script>
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+    client.on("connect", () => {
+      document.getElementById("status").textContent = "✅ Connected to MQTT broker";
+    });
+
+    function updateSpeed() {
+      const speed = document.getElementById("speedSlider").value;
+      document.getElementById("speedValue").textContent = speed;
+      client.publish("esp32/motor/speed", speed);
+    }
+
+    function setDirection(dir) {
+      client.publish("esp32/motor/direction", dir);
+    }
+  </script>
+</body>
+</html>
