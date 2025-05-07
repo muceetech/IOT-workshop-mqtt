@@ -4,31 +4,55 @@
   <title>ESP32 MPU6050 Dashboard</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    h2 { margin-top: 20px; }
-    .value-box { font-size: 1.5em; margin: 5px 0; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+    h1 { margin-bottom: 5px; }
+    .section { margin-top: 20px; }
+    .label { font-weight: bold; margin-bottom: 10px; }
+    .row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .value-box {
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 1.2em;
+      flex: 1;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    #status { font-style: italic; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-<h1>🧭 ESP32 MPU6050 Sensor Dashboard</h1>
-<p id="status">Connecting to MQTT...</p>
+<h1>🧭 ESP32 MPU6050 Dashboard</h1>
+<p id="status">Connecting to MQTT broker...</p>
 
-<h2>Accelerometer (X, Y, Z)</h2>
-<div class="value-box">X: <span id="acc_x">--</span></div>
-<div class="value-box">Y: <span id="acc_y">--</span></div>
-<div class="value-box">Z: <span id="acc_z">--</span></div>
+<div class="section">
+  <div class="label">Accelerometer (m/s²):</div>
+  <div class="row">
+    <div class="value-box">X: <span id="acc_x">--</span></div>
+    <div class="value-box">Y: <span id="acc_y">--</span></div>
+    <div class="value-box">Z: <span id="acc_z">--</span></div>
+  </div>
+</div>
 
-<h2>Gyroscope (X, Y, Z)</h2>
-<div class="value-box">X: <span id="gyro_x">--</span></div>
-<div class="value-box">Y: <span id="gyro_y">--</span></div>
-<div class="value-box">Z: <span id="gyro_z">--</span></div>
+<div class="section">
+  <div class="label">Gyroscope (°/s):</div>
+  <div class="row">
+    <div class="value-box">X: <span id="gyro_x">--</span></div>
+    <div class="value-box">Y: <span id="gyro_y">--</span></div>
+    <div class="value-box">Z: <span id="gyro_z">--</span></div>
+  </div>
+</div>
 
 <script>
   const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
 
   client.on("connect", () => {
-    document.getElementById("status").textContent = "✅ Connected to MQTT";
+    document.getElementById("status").textContent = "✅ Connected to MQTT broker";
     client.subscribe("esp32/mpu6050");
   });
 
@@ -37,6 +61,7 @@
     document.getElementById("acc_x").textContent = data.acc_x;
     document.getElementById("acc_y").textContent = data.acc_y;
     document.getElementById("acc_z").textContent = data.acc_z;
+
     document.getElementById("gyro_x").textContent = data.gyro_x;
     document.getElementById("gyro_y").textContent = data.gyro_y;
     document.getElementById("gyro_z").textContent = data.gyro_z;
