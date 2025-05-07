@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP32 Servo Control Dashboard</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .slider-container {
+      margin-bottom: 20px;
+    }
+    label {
+      font-size: 0.95em;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      accent-color: #007BFF;
+    }
+    #status {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 20px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Servo Control</h1>
+  <p id="status">Connecting to MQTT broker...</p>
+
+  <div class="slider-container">
+    <label for="servo1">Servo 1: <span id="val1">90</span>°</label>
+    <input type="range" id="servo1" min="0" max="180" value="90" oninput="updateServo(1)">
+  </div>
+
+  <div class="slider-container">
+    <label for="servo2">Servo 2: <span id="val2">90</span>°</label>
+    <input type="range" id="servo2" min="0" max="180" value="90" oninput="updateServo(2)">
+  </div>
+
+  <div class="slider-container">
+    <label for="servo3">Servo 3: <span id="val3">90</span>°</label>
+    <input type="range" id="servo3" min="0" max="180" value="90" oninput="updateServo(3)">
+  </div>
+
+  <script>
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+    client.on("connect", () => {
+      document.getElementById("status").textContent = "✅ Connected to MQTT broker";
+    });
+
+    function updateServo(num) {
+      const angle = document.getElementById("servo" + num).value;
+      document.getElementById("val" + num).textContent = angle;
+      client.publish("esp32/servo" + num, angle);
+    }
+  </script>
+</body>
+</html>
