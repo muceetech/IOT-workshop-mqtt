@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DHT11 Sensor Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      padding: 20px;
+      text-align: center;
+    }
+    .card {
+      display: inline-block;
+      background: white;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+    }
+    .value {
+      font-size: 2em;
+      color: #007acc;
+    }
+    #status {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ESP32 DHT11 Sensor Dashboard</h1>
+  <div class="card">
+    <h2>Temperature</h2>
+    <div id="temp" class="value">-- °C</div>
+  </div>
+  <div class="card">
+    <h2>Humidity</h2>
+    <div id="hum" class="value">-- %</div>
+  </div>
+  <p id="status">Connecting to MQTT...</p>
+
+  <script>
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
+      clientId: 'dht-dashboard-' + Math.random().toString(16).substr(2, 8)
+    });
+
+    client.on('connect', () => {
+      document.getElementById('status').innerText = 'Connected to MQTT broker';
+      client.subscribe('esp32/dht');
+    });
+
+    client.on('message', (topic, message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        document.getElementById('temp').innerText = data.temp + ' °C';
+        document.getElementById('hum').innerText = data.hum + ' %';
+      } catch (err) {
+        console.error('Invalid JSON', err);
+      }
+    });
+
+    client.on('error', () => {
+      document.getElementById('status').innerText = 'Error connecting to MQTT';
+    });
+  </script>
+</body>
+</html>
