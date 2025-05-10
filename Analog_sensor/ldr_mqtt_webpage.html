@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP MQTT Dashboard</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .section { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 LDR light intensity Monitor</h1>
+
+  <div class="section">
+   <p> <h3>Analog Value (from MQTT)</h3> </p>
+    Value (in Lux): <label for="voltage" style="font-weight: bold;"></label>
+<input type="text" id="voltage" readonly value="-- Lux" style="
+  padding: 10px;
+  width: 120px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007BFF;
+  background-color: #f0f8ff;
+  border: 2px solid #007BFF;
+  border-radius: 6px;
+  text-align: center;
+  margin-left: 10px;
+">
+  </div>
+
+  <script>
+  const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+  let lastUpdateTime = Date.now();
+
+  client.on("connect", function () {
+    console.log("Connected to MQTT broker");
+    client.subscribe("esp32/ldr");
+  });
+
+  client.on("message", function (topic, message) {
+    if (topic === "esp32/ldr") {
+      const voltage = message.toString();
+      document.getElementById("voltage").value = voltage + " Lux";
+      lastUpdateTime = Date.now();
+    }
+  });
+
+  // Refresh checker: clear display if no data in 2 seconds
+  setInterval(() => {
+    if (Date.now() - lastUpdateTime > 2000) {
+      document.getElementById("voltage").value = "No data";
+    }
+  }, 1000);
+</script>
+</body>
+</html>
