@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MQTT Traffic Light Control</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    .light-control {
+      display: inline-block;
+      text-align: left;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    .status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Traffic Light Control</h1>
+  <div class="light-control">
+    <label><input type="radio" name="light" value="red" onchange="sendLight()"> Red</label>
+    <label><input type="radio" name="light" value="yellow" onchange="sendLight()"> Yellow</label>
+    <label><input type="radio" name="light" value="green" onchange="sendLight()"> Green</label>
+    <label><input type="radio" name="light" value="off" onchange="sendLight()"> All Off</label>
+  </div>
+  <div class="status" id="status">Connecting to MQTT...</div>
+
+  <script>
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+    client.on("connect", () => {
+      document.getElementById("status").textContent = "✅ Connected to MQTT";
+    });
+
+    function sendLight() {
+      const selected = document.querySelector('input[name="light"]:checked').value;
+      client.publish("esp32/traffic", selected);
+      document.getElementById("status").textContent = "Sent: " + selected;
+    }
+  </script>
+</body>
+</html>
