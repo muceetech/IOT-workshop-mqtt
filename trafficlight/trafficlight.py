@@ -14,6 +14,9 @@ MQTT_TOPIC = b"esp32/traffic"
 led_red = Pin(19, Pin.OUT)
 led_yellow = Pin(18, Pin.OUT)
 led_green = Pin(5, Pin.OUT)
+led_red.value(0)
+led_yellow.value(0)
+led_green.value(0)
 
 def connect_wifi():
     wlan = network.WLAN(network.STA_IF)
