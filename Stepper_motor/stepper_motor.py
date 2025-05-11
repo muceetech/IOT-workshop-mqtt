@@ -2,7 +2,7 @@ import machine
 import time
 
 # Bipolar stepper motor connected to A4988 motor controller 
-# dir pin to pin 18 , Step pin to pin 5 of ESP32. change as per yout neeed
+# dir pin to pin 18 , Step pin to pin 5 of ESP32. change as per yout need
 # Connections from A4988 driver IC to stepper motor
 #  Stepper motor - A4988 Driver
 #  A+ - 1B
